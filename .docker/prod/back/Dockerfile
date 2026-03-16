@@ -22,7 +22,7 @@ COPY --from=dependencies /app/node_modules ./node_modules
 
 COPY ./back ./
 
-RUN --mount=type=cache,target=/app/.next/cache npm run build
+RUN npm run build
 
 FROM node:24-slim AS runner
 

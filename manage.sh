@@ -21,7 +21,7 @@ usage() {
     echo "  restart           - Restart containers"
     echo "  pull              - Pull latest images (PROD only)"
     echo "  logs              - Show logs (tail 100)"
-    echo "  exec              - Open interactive shell in a running container (front|back|proxy)"
+    echo "  exec              - Exec into container or run a one-off command (front|back|proxy)"
     exit "$exit_code"
 }
 
