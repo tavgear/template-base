@@ -1,0 +1,36 @@
+name: ${PROJECT_NAME}
+
+services:
+
+  # Next.js
+  front:
+    environment:
+      NEXT_TELEMETRY_DISABLED: 1
+      API_URL: http://back:1337
+      NEXT_PUBLIC_API_URL: http://${DOMAIN}:${BACK_HTTP_PORT}
+
+  # Strapi
+  back:
+    environment:
+      STRAPI_TELEMETRY_DISABLED: true
+      BROWSER: FALSE
+      APP_KEYS: ${STRAPI_APP_KEYS}
+      API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT}
+      ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET}
+      JWT_SECRET: ${STRAPI_JWT_SECRET}
+      TRANSFER_TOKEN_SALT: ${STRAPI_TRANSFER_TOKEN_SALT}
+      ENCRYPTION_KEY: ${STRAPI_ENCRYPTION_KEY}
+    ports:
+      - "${BACK_HTTP_PORT}:1337"
+
+  # Caddy
+  proxy:
+    ports:
+      - "${HTTP_PORT}:80"
+      - "${HTTPS_PORT}:443"
+    volumes:
+      - proxy_caddy_data:/data
+
+volumes:
+  # SSL
+  proxy_caddy_data:

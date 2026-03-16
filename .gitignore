@@ -1,0 +1,6 @@
+# IDE (rules committed as part of template)
+.cursor/*
+!.cursor/rules/
+
+# Local environment
+.env.local

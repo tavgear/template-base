@@ -1,0 +1,41 @@
+name: ${PROJECT_NAME}-dev
+
+services:
+
+  front:
+    build:
+      dockerfile: ./.docker/dev/front/Dockerfile
+      args:
+        UID: ${DEV_USER_ID}
+        UNAME: ${DEV_USER_NAME}
+        API_URL: http://back:1337
+        NEXT_PUBLIC_API_URL: http://${DOMAIN}:${BACK_HTTP_PORT}
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./front:/app
+
+  back:
+    build:
+      dockerfile: ./.docker/dev/back/Dockerfile
+      args:
+        UID: ${DEV_USER_ID}
+        UNAME: ${DEV_USER_NAME}
+    environment:
+      NODE_ENV: development
+    ports:
+      - "${BACK_HTTP_PORT_EXT}:5173"
+    volumes:
+      - ./back:/app
+
+  proxy:
+    image: caddy:latest
+    configs:
+      - source: proxy-caddy
+        target: /etc/caddy/Caddyfile
+
+configs:
+  proxy-caddy:
+    file: .docker/dev/proxy/Caddyfile

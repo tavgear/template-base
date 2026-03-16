@@ -1,0 +1,29 @@
+name: ${PROJECT_NAME}-prod
+
+services:
+
+  front:
+    build:
+      dockerfile: ./.docker/prod/front/Dockerfile
+      args:
+        API_URL: http://back:1337
+        NEXT_PUBLIC_API_URL: http://${DOMAIN}:${BACK_HTTP_PORT}
+    environment:
+      NODE_ENV: production
+
+  back:
+    build:
+      dockerfile: ./.docker/prod/back/Dockerfile
+    environment:
+      NODE_ENV: production
+    volumes:
+      - back_strapi_db:/app/.tmp
+      - back_strapi_uploads:/app/public/uploads
+
+  proxy:
+    build:
+      dockerfile: ./.docker/prod/proxy/Dockerfile
+
+volumes:
+  back_strapi_db:
+  back_strapi_uploads:

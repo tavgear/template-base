@@ -1,0 +1,18 @@
+# Stage 0: All
+# =====================================================================================================================
+FROM node:24-slim
+
+ENV NODE_ENV=production
+ENV STRAPI_TELEMETRY_DISABLED=true
+
+WORKDIR /app
+
+COPY ./back/package.json ./back/package-lock.json ./
+
+RUN npm install
+
+COPY ./back ./
+
+RUN npm run build
+
+CMD ["npm", "run", "start"]

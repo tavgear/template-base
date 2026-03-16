@@ -1,0 +1,17 @@
+# Dependencies
+back/node_modules
+back/public/uploads
+back/.tmp
+back/logs
+
+back/.git
+back/.gitignore
+
+back/.env
+back/exports
+back/.strapi
+back/dist
+back/build
+back/.strapi-updater.json
+back/.strapi-cloud.json
+

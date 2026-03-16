@@ -1,0 +1,123 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      sha_short: ${{ steps.vars.outputs.sha_short }}
+      front_image: ${{ steps.images.outputs.front_image }}
+      back_image: ${{ steps.images.outputs.back_image }}
+      proxy_image: ${{ steps.images.outputs.proxy_image }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Set short SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Define image paths
+        id: images
+        run: |
+          echo "front_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-front" >> $GITHUB_OUTPUT
+          echo "back_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-back" >> $GITHUB_OUTPUT
+          echo "proxy_image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-proxy" >> $GITHUB_OUTPUT
+
+  build-and-push:
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      # Необходим для корректной работы Bake, особенно внутри act (локально)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push with Docker Bake
+        uses: docker/bake-action@v7
+        with:
+          files: |
+            compose.yaml
+            compose.prod.yaml
+          push: true
+          set: |
+            front.cache-from=type=gha,scope=front
+            front.cache-to=type=gha,mode=max,scope=front
+            back.cache-from=type=gha,scope=back
+            back.cache-to=type=gha,mode=max,scope=back
+            proxy.cache-from=type=gha,scope=proxy
+            proxy.cache-to=type=gha,mode=max,scope=proxy
+            front.tags=${{ needs.prepare.outputs.front_image }}:latest
+            front.tags=${{ needs.prepare.outputs.front_image }}:${{ needs.prepare.outputs.sha_short }}
+            back.tags=${{ needs.prepare.outputs.back_image }}:latest
+            back.tags=${{ needs.prepare.outputs.back_image }}:${{ needs.prepare.outputs.sha_short }}
+            proxy.tags=${{ needs.prepare.outputs.proxy_image }}:latest
+            proxy.tags=${{ needs.prepare.outputs.proxy_image }}:${{ needs.prepare.outputs.sha_short }}
+  deploy:
+    needs: [prepare, build-and-push]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code (for compose files)
+        uses: actions/checkout@v6
+
+      - name: Copy compose files via SCP
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.DOMAIN }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "compose.yaml,compose.prod.yaml,compose.deploy.yaml,.env,manage.sh"
+          target: ${{ secrets.REMOTE_TARGET }}
+
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.DOMAIN }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.REMOTE_TARGET }}
+
+            # Авторизация в GHCR
+            echo ${{ secrets.CR_PAT }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+            # Обновление DOMAIN в .env.local на основе секрета DOMAIN
+            if grep -q "DOMAIN=" .env.local; then
+              sed -i "s/^DOMAIN=.*/DOMAIN=${{ secrets.DOMAIN }} # Generated from GitHub Secret/" .env.local
+            else
+              echo "DOMAIN=${{ secrets.DOMAIN }} # Generated from GitHub Secret" >> .env.local
+            fi
+
+            # Обновление SHA_SHORT в .env.local с датой деплоя
+            DEPLOY_DATE=$(date '+%Y-%m-%d %H:%M:%S')
+            if grep -q "SHA_SHORT=" .env.local; then
+              sed -i "s/^SHA_SHORT=.*/SHA_SHORT=${{ needs.prepare.outputs.sha_short }} # Deployed at $DEPLOY_DATE/" .env.local
+            else
+              echo "SHA_SHORT=${{ needs.prepare.outputs.sha_short }} # Deployed at $DEPLOY_DATE" >> .env.local
+            fi
+
+            # Загрузка новых образов и перезапуск через наш скрипт
+            ./manage.sh prod pull
+            ./manage.sh prod up
+
+            # Очистка старых данных
+            docker image prune -af

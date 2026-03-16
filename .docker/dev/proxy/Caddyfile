@@ -1,0 +1,8 @@
+http://{$DOMAIN}:80 {
+    # Next.js Frontend
+    reverse_proxy front:3000
+
+    # Redirect /admin to Strapi admin
+    redir /admin http://{$DOMAIN}:{$BACK_HTTP_PORT}/admin 302
+}
+

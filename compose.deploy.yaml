@@ -1,0 +1,16 @@
+name: ${PROJECT_NAME}-public
+
+services:
+
+  front:
+    image: ghcr.io/${GITHUB_USER_NAME}/${PROJECT_NAME}-front:${SHA_SHORT:-latest}
+    build: !reset null
+
+  back:
+    image: ghcr.io/${GITHUB_USER_NAME}/${PROJECT_NAME}-back:${SHA_SHORT:-latest}
+    build: !reset null
+
+  proxy:
+    image: ghcr.io/${GITHUB_USER_NAME}/${PROJECT_NAME}-proxy:${SHA_SHORT:-latest}
+    build: !reset null
+
