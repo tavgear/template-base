@@ -1,22 +1,22 @@
 ---
-description: Backend — Strapi 5, контент-типы, API
+description: Backend — Strapi 5, content-types, API
 globs: back/**
 alwaysApply: false
 ---
 
 # Backend (Strapi 5)
 
-## Конвенции
+## Conventions
 
-- **TypeScript** для всего кода бэкенда.
-- Контент-типы и API описываются в `back/src/api/`: по одной папке на сущность (content-types, controllers, routes, services). Следовать конвенциям Strapi 5.
+- Use **TypeScript** for all backend code.
+- Content-types and APIs live in `back/src/api/`: one folder per entity (content-types, controllers, routes, services). Follow Strapi 5 conventions.
 
-## Структура API
+## API structure
 
-- `back/src/api/<name>/content-types/<name>/schema.json` — схема контент-типа.
-- Контроллеры, роуты, сервисы — в соответствующих подпапках `back/src/api/<name>/`.
+- `back/src/api/<name>/content-types/<name>/schema.json` — content-type schema.
+- Controllers, routes, services live in the respective subfolders of `back/src/api/<name>/`.
 
-## Правила для AI
+## Rules for the AI
 
-- При добавлении или изменении контент-типов — править файлы в `back/src/api/`, а не только через админку (чтобы изменения были в коде и в репозитории).
-- Использовать актуальные API и структуру папок Strapi 5.
+- When adding or changing content-types, update files in `back/src/api/`, not only via the Strapi admin UI (so that changes stay in code and in the repository).
+- Use the current APIs and folder structure of Strapi 5.

@@ -6,27 +6,27 @@ alwaysApply: false
 
 # Frontend (Next.js)
 
-## Конвенции
+## Conventions
 
-- **App Router:** маршруты в `app/`, layouts и pages. Не использовать Pages Router (`pages/`, `getServerSideProps`).
-- Компоненты — в `front/components/`, утилиты — в `front/lib/`. TypeScript, компоненты переиспользуемые и типизированные.
-- Стили — **Tailwind CSS v4**.
+- **App Router:** routes live in `app/` (layouts and pages). Do not use Pages Router (`pages/`, `getServerSideProps`).
+- Components live in `front/components/`, utilities in `front/lib/`. Use TypeScript, reusable and well-typed components.
+- Styles use **Tailwind CSS v4**.
 
-## API и Strapi
+## API and Strapi
 
-- Обращения к Strapi — через `front/lib/api.ts` (или аналог). На сервере использовать внутренний URL Docker: `http://back:1337`. На клиенте — `NEXT_PUBLIC_API_URL`.
-- ISR: при fetch к API указывать `next: { revalidate: 60 }` (ревалидация раз в 60 сек).
-- Сборка: Next.js с `output: 'standalone'` для Docker.
+- Requests to Strapi go through `front/lib/api.ts` (or an equivalent helper). On the server use the internal Docker URL: `http://back:1337`. On the client use `NEXT_PUBLIC_API_URL`.
+- ISR: when fetching from the API, set `next: { revalidate: 60 }` (revalidation every 60 seconds).
+- Build: Next.js should use `output: 'standalone'` for Docker images.
 
-## Пример (вызов API на сервере)
+## Example (server-side API call)
 
 ```ts
-// Server Component или server action
+// Server Component or server action
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://back:1337';
 const res = await fetch(`${apiUrl}/api/...`, { next: { revalidate: 60 } });
 ```
 
-## Не делать
+## Do NOT
 
-- Не использовать `pages/`, `getStaticProps`, `getServerSideProps`.
-- Не хардкодить URL бэкенда на клиенте — использовать `NEXT_PUBLIC_API_URL`.
+- Do not use `pages/`, `getStaticProps`, `getServerSideProps`.
+- Do not hardcode the backend URL on the client — always use `NEXT_PUBLIC_API_URL`.
