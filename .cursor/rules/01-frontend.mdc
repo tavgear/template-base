@@ -1,0 +1,32 @@
+---
+description: Frontend — Next.js App Router, Tailwind v4, API
+globs: front/**
+alwaysApply: false
+---
+
+# Frontend (Next.js)
+
+## Конвенции
+
+- **App Router:** маршруты в `app/`, layouts и pages. Не использовать Pages Router (`pages/`, `getServerSideProps`).
+- Компоненты — в `front/components/`, утилиты — в `front/lib/`. TypeScript, компоненты переиспользуемые и типизированные.
+- Стили — **Tailwind CSS v4**.
+
+## API и Strapi
+
+- Обращения к Strapi — через `front/lib/api.ts` (или аналог). На сервере использовать внутренний URL Docker: `http://back:1337`. На клиенте — `NEXT_PUBLIC_API_URL`.
+- ISR: при fetch к API указывать `next: { revalidate: 60 }` (ревалидация раз в 60 сек).
+- Сборка: Next.js с `output: 'standalone'` для Docker.
+
+## Пример (вызов API на сервере)
+
+```ts
+// Server Component или server action
+const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://back:1337';
+const res = await fetch(`${apiUrl}/api/...`, { next: { revalidate: 60 } });
+```
+
+## Не делать
+
+- Не использовать `pages/`, `getStaticProps`, `getServerSideProps`.
+- Не хардкодить URL бэкенда на клиенте — использовать `NEXT_PUBLIC_API_URL`.
