@@ -8,6 +8,7 @@ usage() {
     local exit_code=${1:-0}
     echo "Usage: $0 <dev|prod> [command]"
     echo "       $0 <dev|prod> init [back|front]"
+    echo "       $0 <dev|prod> exec <front|back|proxy>"
     echo "ps                  - List running containers"
     echo ""
     echo "Mode (dev or prod) must be specified first for all others commands."
@@ -20,6 +21,7 @@ usage() {
     echo "  restart           - Restart containers"
     echo "  pull              - Pull latest images (PROD only)"
     echo "  logs              - Show logs (tail 100)"
+    echo "  exec              - Open interactive shell in a running container (front|back|proxy)"
     exit "$exit_code"
 }
 
@@ -286,6 +288,21 @@ case "$COMMAND" in
         run_compose pull ;;
     logs)
         run_compose logs -f --tail=100 ;;
+    exec)
+        SERVICE=${2:-}
+        if [[ -z "$SERVICE" ]]; then
+            echo "Error: Service name is required."
+            echo "Usage: $0 $MODE exec <front|back|proxy>"
+            exit 1
+        fi
+
+        if [[ ! "$SERVICE" =~ ^(front|back|proxy)$ ]]; then
+            echo "Error: Unsupported service '$SERVICE'."
+            echo "Allowed services: front, back, proxy."
+            exit 1
+        fi
+
+        run_compose exec "$SERVICE" sh ;;
     *)
         usage 1 ;;
 esac
