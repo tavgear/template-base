@@ -292,7 +292,7 @@ case "$COMMAND" in
         SERVICE=${2:-}
         if [[ -z "$SERVICE" ]]; then
             echo "Error: Service name is required."
-            echo "Usage: $0 $MODE exec <front|back|proxy>"
+            echo "Usage: $0 $MODE exec <front|back|proxy> [command...]"
             exit 1
         fi
 
@@ -301,8 +301,16 @@ case "$COMMAND" in
             echo "Allowed services: front, back, proxy."
             exit 1
         fi
-
-        run_compose exec "$SERVICE" sh ;;
+        
+        shift 2
+        if [ "$#" -eq 0 ]; then
+            # No extra command provided — open interactive shell
+            run_compose exec "$SERVICE" sh
+        else
+            # Pass the rest of the arguments as a command to run
+            run_compose exec "$SERVICE" "$@"
+        fi
+        ;;
     *)
         usage 1 ;;
 esac

@@ -41,6 +41,8 @@ cd <название_проекта>
 - `./manage.sh dev build` — сборка образов.
 - `./manage.sh dev logs` — просмотр логов.
 - `./manage.sh dev ps` — статус запущенных контейнеров.
+- `./manage.sh dev exec <front|back|proxy>` — интерактивный доступ в контейнеры (аналог `docker compose exec <service> sh`).
+- `./manage.sh dev exec <front|back|proxy> <command...>` — выполнить команду внутри контейнера (аналог `docker compose exec <service> <command...>`), например: `./manage.sh dev exec front ls /app`.
 - `./manage.sh prod pull` — скачивание свежих образов из Registry (только для PROD).
 
 ---
