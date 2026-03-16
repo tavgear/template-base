@@ -179,7 +179,7 @@ EOF
         else
             echo "START init back (Strapi)"
             echo "==============="
-            docker run --rm -t -v ".:/app" -w /app node:24-slim \
+            docker run --rm -t -v ".:/app" -w /app --user "$(id -u):$(id -g)" node:24-slim \
                 sh -lc '
                     set -eu;
                     npx -y create-strapi-app@latest back --skip-cloud --no-run --typescript --non-interactive;
@@ -196,7 +196,7 @@ EOF
         else
             echo "START init front (Next.js)"
             echo "===================================="
-            docker run --rm -t -v ".:/app" -w /app node:24-slim \
+            docker run --rm -t -v ".:/app" -w /app --user "$(id -u):$(id -g)" node:24-slim \
                 sh -lc '
                     set -eu;
                     npx -y create-next-app@latest front --yes;
