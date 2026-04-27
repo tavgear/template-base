@@ -9,7 +9,6 @@ services:
         UID: ${DEV_USER_ID}
         UNAME: ${DEV_USER_NAME}
         API_URL: http://back:1337
-        NEXT_PUBLIC_API_URL: http://${DOMAIN}:${BACK_HTTP_PORT}
     environment:
       NODE_ENV: development
     ports:
