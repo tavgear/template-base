@@ -9,8 +9,26 @@ services:
       API_URL: http://back:1337
       NEXT_PUBLIC_API_URL: http://${DOMAIN}:${BACK_HTTP_PORT}
 
+  # PostgreSQL
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+
   # Strapi
   back:
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       STRAPI_TELEMETRY_DISABLED: true
       BROWSER: FALSE
@@ -20,6 +38,12 @@ services:
       JWT_SECRET: ${STRAPI_JWT_SECRET}
       TRANSFER_TOKEN_SALT: ${STRAPI_TRANSFER_TOKEN_SALT}
       ENCRYPTION_KEY: ${STRAPI_ENCRYPTION_KEY}
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: db
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - "${BACK_HTTP_PORT}:1337"
 
