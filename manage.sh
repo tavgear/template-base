@@ -273,7 +273,9 @@ EOF
 
     # Создать директории для bind mounts
     echo "[+] Creating data directories..."
-    mkdir -p data/postgres
+    mkdir -p data/postgres data/uploads
+    # uploads — от node (UID 1000); postgres управляет правами сам
+    chown -R 1000:1000 data/uploads
     echo "[OK] data/ directories created"
 }
 

@@ -17,11 +17,8 @@ services:
     environment:
       NODE_ENV: production
     volumes:
-      - back_strapi_uploads:/app/public/uploads
+      - ./data/uploads:/app/public/uploads
 
   proxy:
     build:
       dockerfile: ./.docker/prod/proxy/Dockerfile
-
-volumes:
-  back_strapi_uploads:
