@@ -9,6 +9,7 @@ usage() {
     echo "Usage: $0 <dev|prod> [command]"
     echo "       $0 <dev|prod> init [back|front]"
     echo "       $0 <dev|prod> exec <front|back|proxy>"
+    echo "       $0 <dev|prod> npm-install <front|back> [npm install args...]"
     echo "ps                  - List running containers"
     echo ""
     echo "Mode (dev or prod) must be specified first for all others commands."
@@ -22,6 +23,7 @@ usage() {
     echo "  pull              - Pull latest images (PROD only)"
     echo "  logs              - Show logs (tail 100)"
     echo "  exec              - Exec into container or run a one-off command (front|back|proxy)"
+    echo "  npm-install       - Run 'npm install' inside a temporary Node container (in back|front dir)"
     exit "$exit_code"
 }
 
@@ -339,6 +341,36 @@ case "$COMMAND" in
             # Pass the rest of the arguments as a command to run
             run_compose exec "$SERVICE" "$@"
         fi
+        ;;
+    npm-install)
+        # Run `npm install` in a temporary Node container, mirroring current user,
+        # inside either ./front or ./back
+        TARGET_DIR=${2:-}
+
+        if [[ -z "$TARGET_DIR" ]]; then
+            echo "Error: Target directory is required."
+            echo "Usage: $0 $MODE npm-install <front|back> [npm install args...]"
+            exit 1
+        fi
+
+        if [[ ! "$TARGET_DIR" =~ ^(front|back)$ ]]; then
+            echo "Error: Unsupported target '$TARGET_DIR'."
+            echo "Allowed targets: front, back."
+            exit 1
+        fi
+
+        if [ ! -d "$TARGET_DIR" ]; then
+            echo "Error: Directory '$TARGET_DIR' does not exist."
+            exit 1
+        fi
+
+        shift 2
+        docker run --rm -it \
+            -v ".:/app" \
+            -w "/app/$TARGET_DIR" \
+            --user "$(id -u):$(id -g)" \
+            node:24-slim \
+            sh -lc "npm install $*"
         ;;
     *)
         usage 1 ;;
