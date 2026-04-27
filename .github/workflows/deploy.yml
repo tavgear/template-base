@@ -57,6 +57,7 @@ jobs:
           files: |
             compose.yaml
             compose.prod.yaml
+          targets: front,back,proxy
           push: true
           set: |
             front.cache-from=type=gha,scope=front
