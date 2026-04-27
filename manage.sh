@@ -306,7 +306,8 @@ case "$COMMAND" in
     down)
         run_compose down ;;
     restart)
-        run_compose restart ;;
+        run_compose down
+        run_compose up -d --remove-orphans ;;
     pull)
         if [ "$MODE" == "dev" ]; then
             echo "[!] 'pull' command is disabled in DEV mode."
