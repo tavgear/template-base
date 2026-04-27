@@ -1,6 +1,7 @@
-# IDE (rules committed as part of template)
-.cursor/*
-!.cursor/rules/
+# IDE (rules and settings committed as part of template)
+.claude/*
+!.claude/rules/
+!.claude/settings.json
 
 # Local environment
 .env.local
