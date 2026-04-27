@@ -1,82 +1,85 @@
-## Base Template (Strapi + Next.js)
+# Base Template (Strapi 5 + Next.js 16)
 
-- **Backend:** Strapi (Node.js)
-- **Frontend:** Next.js
-- **Database:** SQLite
-- **Proxy:** Caddy (с автоматическим SSL)
-- **Orchestration:** Docker Compose
+Шаблон для запуска проектов на стеке Strapi + Next.js в Docker.
 
----
+## Стек
 
-### Локальная разработка
+- **Frontend:** Next.js 16 (App Router), React 19, TypeScript 5, Tailwind 4
+- **Backend:** Strapi 5, Node 24
+- **БД:** PostgreSQL 17
+- **Proxy:** Caddy (с автоматическим SSL на проде)
+- **Orchestration:** Docker Compose, GitHub Actions + GHCR
 
-Клонирование и инициализация
+## Быстрый старт
 
 ```bash
-git clone <URL_репозитория>
-cd <название_проекта>
-./manage.sh dev init
+git clone <URL>
+cd <project>
+./manage.sh dev init    # создаст .env.local, скачает Strapi и Next.js
+./manage.sh dev up      # поднимет контейнеры
 ```
 
-Настройка окружения
+После запуска:
 
-`.env.local`
+- Frontend: http://localhost
+- Strapi admin: http://localhost:1337/admin
 
-### Запуск в режиме разработки
+## Управление
 
 ```bash
-./manage.sh dev up
+./manage.sh dev up                          # запуск
+./manage.sh dev down                        # остановка
+./manage.sh dev restart                     # перезапуск (down + up)
+./manage.sh dev build                       # сборка образов
+./manage.sh dev logs                        # логи (tail 100, follow)
+./manage.sh ps                              # список контейнеров
+./manage.sh dev exec <front|back|proxy>     # интерактивный shell в контейнере
+./manage.sh dev exec <svc> <cmd...>         # одноразовая команда в контейнере
+./manage.sh dev npm-install <front|back>    # npm install в одноразовом Node-контейнере
 ```
----
 
-### Управление проектом
+## Структура
 
-Для удобства используется скрипт `manage.sh`. Основные команды:
+```
+back/           — Strapi backend
+front/          — Next.js frontend
+data/           — bind mounts: postgres, uploads (gitignored)
+docs/           — документация → docs/README.md
+.docker/        — Dockerfile'ы и Caddyfile'ы (dev/prod)
+compose*.yaml   — Docker Compose
+manage.sh       — CLI управления
+.claude/rules/  — правила для AI-ассистента
+```
 
-- `./manage.sh dev init` — инициализация проекта для разработки (создаст `.env.local`, проинициализирует back/front при отсутствии).
-- `./manage.sh dev init back` — инициализация только бэкенда (Strapi).
-- `./manage.sh dev init front` — инициализация только фронтенда (Next.js).
-- `./manage.sh dev up` — запуск контейнеров в фоновом режиме.
-- `./manage.sh dev down` — остановка контейнеров.
-- `./manage.sh dev build` — сборка образов.
-- `./manage.sh dev logs` — просмотр логов.
-- `./manage.sh dev ps` — статус запущенных контейнеров.
-- `./manage.sh dev exec <front|back|proxy>` — интерактивный доступ в контейнеры (аналог `docker compose exec <service> sh`).
-- `./manage.sh dev exec <front|back|proxy> <command...>` — выполнить команду внутри контейнера (аналог `docker compose exec <service> <command...>`), например: `./manage.sh dev exec front ls /app`.
-- `./manage.sh prod pull` — скачивание свежих образов из Registry (только для PROD).
+## Архитектурные решения (вкратце)
 
----
+- Frontend ходит к Strapi только server-side; `NEXT_PUBLIC_API_URL` не используется.
+- Медиа (`/uploads/*`) раздаёт Caddy напрямую с диска, минуя Node.
+- Bind mounts для всех персистентных данных — бэкап через `tar`.
+- PostgreSQL в dev и prod (одна БД везде).
+- Preview/Draft Mode настроен из коробки (`PREVIEW_SECRET`).
 
-### Инициализация на проде
+Подробнее — в [docs/architecture.md](docs/architecture.md).
 
-Скачать и сохранить в рабочую папку проекта файлы из корня репозитария:
+## Инициализация на проде
 
-- `.env`
-- `manage.sh`
-
-Сделать скрипт исполняемым
+На сервере достаточно `manage.sh` и `.env`. Деплой настроен через GitHub Actions (`.github/workflows/deploy.yml`): при push в `main` собираются образы в GHCR, на сервер копируются compose-файлы, поднимается стек.
 
 ```bash
+# На сервере, в рабочей папке проекта:
 chmod +x manage.sh
+./manage.sh prod init     # сгенерирует .env.local, создаст data/postgres и data/uploads
+# Заполнить REQUIRED-поля в .env.local (PROJECT_NAME, GITHUB_USER_NAME, DOMAIN)
 ```
-Запустить инициализацию в режиме prod
 
-```bash
-./manage.sh prod init
-```
-Настроить `.env.local`
-
----
-
-## Деплой
+Дальше прод обновляется автоматически по push в `main`.
 
 ### Настройка GitHub Secrets
 
-Добавить в репозиторий github (Settings -> Secrets and variables -> Actions) следующие секреты:
+В репозитории GitHub (Settings → Secrets and variables → Actions):
 
-- `DOMAIN`: Доменное имя вашего сервера.
-- `SSH_USER`: Имя пользователя для подключения по SSH.
-- `SSH_PRIVATE_KEY`: Приватный SSH ключ (содержимое файла `~/.ssh/id_rsa`).
-- `REMOTE_TARGET`: Путь к директории проекта на удаленном сервере (например, `/home/user/project`).
-- `CR_PAT`: Personal Access Token (PAT) с правами на чтение пакетов (packages) из GitHub Container Registry.
-
+- `DOMAIN` — доменное имя сервера.
+- `SSH_USER` — пользователь для SSH.
+- `SSH_PRIVATE_KEY` — приватный ключ (содержимое `~/.ssh/id_rsa`).
+- `REMOTE_TARGET` — путь к рабочей папке проекта на сервере.
+- `CR_PAT` — Personal Access Token с правом `read:packages` (для pull из GHCR).
