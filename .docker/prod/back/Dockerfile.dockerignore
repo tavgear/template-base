@@ -1,7 +1,6 @@
 # Dependencies
 back/node_modules
 back/public/uploads
-back/.tmp
 back/logs
 
 back/.git
