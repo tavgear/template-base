@@ -22,3 +22,5 @@ services:
   proxy:
     build:
       dockerfile: ./.docker/prod/proxy/Dockerfile
+    volumes:
+      - ./data/uploads:/srv/uploads:ro

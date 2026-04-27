@@ -35,6 +35,8 @@ services:
     configs:
       - source: proxy-caddy
         target: /etc/caddy/Caddyfile
+    volumes:
+      - ./back/public/uploads:/srv/uploads:ro
 
 configs:
   proxy-caddy:
