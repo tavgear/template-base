@@ -4,3 +4,6 @@
 
 # Local environment
 .env.local
+
+# PostgreSQL data
+data/postgres/

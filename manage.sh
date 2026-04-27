@@ -123,6 +123,8 @@ generate_secrets() {
     STRAPI_JWT_SECRET=$(openssl rand -base64 24)
     STRAPI_TRANSFER_TOKEN_SALT=$(openssl rand -base64 16)
     STRAPI_ENCRYPTION_KEY=$(openssl rand -base64 16)
+    # Database
+    DATABASE_PASSWORD=$(openssl rand -base64 16)
 }
 
 init_dev() {
@@ -171,8 +173,16 @@ STRAPI_ADMIN_JWT_SECRET=$STRAPI_ADMIN_JWT_SECRET
 STRAPI_JWT_SECRET=$STRAPI_JWT_SECRET
 STRAPI_TRANSFER_TOKEN_SALT=$STRAPI_TRANSFER_TOKEN_SALT
 STRAPI_ENCRYPTION_KEY=$STRAPI_ENCRYPTION_KEY
+
+# Database
+DATABASE_PASSWORD=$DATABASE_PASSWORD
 EOF
     fi
+
+    # Создать директории для bind mounts (от текущего пользователя)
+    echo "[+] Creating data directories..."
+    mkdir -p data/postgres
+    echo "[OK] data/ directories created"
 
     # Инициализация бэкенда
     if [ "$target" == "all" ] || [ "$target" == "back" ]; then
@@ -252,11 +262,19 @@ STRAPI_ADMIN_JWT_SECRET=$STRAPI_ADMIN_JWT_SECRET
 STRAPI_JWT_SECRET=$STRAPI_JWT_SECRET
 STRAPI_TRANSFER_TOKEN_SALT=$STRAPI_TRANSFER_TOKEN_SALT
 STRAPI_ENCRYPTION_KEY=$STRAPI_ENCRYPTION_KEY
+
+# Database
+DATABASE_PASSWORD=$DATABASE_PASSWORD
 EOF
         echo "[OK] .env.local created. PLEASE EDIT REQUIRED FIELDS!"
     else
         echo "[!] .env.local already exists."
     fi
+
+    # Создать директории для bind mounts
+    echo "[+] Creating data directories..."
+    mkdir -p data/postgres
+    echo "[OK] data/ directories created"
 }
 
 case "$COMMAND" in
