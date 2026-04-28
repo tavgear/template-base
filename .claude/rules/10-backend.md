@@ -11,7 +11,7 @@ back/src/api/<name>/
 
 ## Правила
 - **TypeScript** для всего backend-кода.
-- Content-types — только через файлы в `back/src/api/`, не через Strapi admin UI. Это нужно, чтобы изменения попадали в git.
+- Content-types редактируются только в dev — через admin UI (Strapi пишет `schema.json` в `back/src/api/<name>/`) или руками. Файлы коммитить в git. В prod admin блокирует изменение схем.
 - Следовать конвенциям и структуре папок Strapi 5.
 - `back/types/generated/` — автогенерируется Strapi из `schema.json` при каждом старте. В git не коммитится, руками не править.
 
