@@ -202,6 +202,9 @@ EOF
                 sh -lc '
                     set -eu;
                     npx -y create-strapi-app@latest back --skip-cloud --no-run --typescript --non-interactive;
+                    cd back;
+                    npm uninstall better-sqlite3;
+                    npm install pg;
                 '
             echo "==============="
             echo "FINISH init back"
