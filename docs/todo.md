@@ -8,6 +8,7 @@
 
 ## Технический долг
 
+- [ ] Настроить HTTPS в Caddy на проде (сейчас только HTTP). Затронет `.docker/prod/proxy/Caddyfile` и `STRAPI_ADMIN_FRONTEND_URL` в `compose.yaml` (поднять на `https://`).
 - [ ] (пример) Добавить ISR-кеширование на главной странице
 
 ## Продуктовый долг

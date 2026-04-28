@@ -7,7 +7,7 @@
 - **Frontend:** Next.js 16 (App Router), React 19, TypeScript 5, Tailwind 4
 - **Backend:** Strapi 5, Node 24
 - **БД:** PostgreSQL 17
-- **Proxy:** Caddy (с автоматическим SSL на проде)
+- **Proxy:** Caddy (пока только HTTP; HTTPS будет позже)
 - **Orchestration:** Docker Compose, GitHub Actions + GHCR
 
 ## Быстрый старт
