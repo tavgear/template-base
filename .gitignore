@@ -9,3 +9,6 @@
 # Persisted data (bind mounts)
 data/postgres/
 data/uploads/
+
+# Strapi auto-generated TS types (regenerated from schema.json on every start)
+back/types/generated/
