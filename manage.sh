@@ -119,16 +119,16 @@ run_compose() {
 # Функция генерации секретов
 generate_secrets() {
     # Для Strapi
-    STRAPI_APP_KEYS=$(openssl rand -base64 16),$(openssl rand -base64 16),$(openssl rand -base64 16),$(openssl rand -base64 16)
-    STRAPI_API_TOKEN_SALT=$(openssl rand -base64 16)
-    STRAPI_ADMIN_JWT_SECRET=$(openssl rand -base64 16)
-    STRAPI_JWT_SECRET=$(openssl rand -base64 24)
-    STRAPI_TRANSFER_TOKEN_SALT=$(openssl rand -base64 16)
-    STRAPI_ENCRYPTION_KEY=$(openssl rand -base64 16)
+    STRAPI_APP_KEYS=$(openssl rand -hex 16),$(openssl rand -hex 16),$(openssl rand -hex 16),$(openssl rand -hex 16)
+    STRAPI_API_TOKEN_SALT=$(openssl rand -hex 16)
+    STRAPI_ADMIN_JWT_SECRET=$(openssl rand -hex 16)
+    STRAPI_JWT_SECRET=$(openssl rand -hex 24)
+    STRAPI_TRANSFER_TOKEN_SALT=$(openssl rand -hex 16)
+    STRAPI_ENCRYPTION_KEY=$(openssl rand -hex 16)
     # Preview (shared between Strapi and Next.js)
-    PREVIEW_SECRET=$(openssl rand -base64 32)
+    PREVIEW_SECRET=$(openssl rand -hex 32)
     # Database
-    DATABASE_PASSWORD=$(openssl rand -base64 16)
+    DATABASE_PASSWORD=$(openssl rand -hex 16)
 }
 
 init_dev() {
@@ -206,6 +206,7 @@ EOF
             echo "==============="
             echo "FINISH init back"
         fi
+        mkdir -p back/public/uploads
     fi
 
     # Инициализация фронтенда
@@ -298,6 +299,11 @@ case "$COMMAND" in
         if [ "$MODE" == "dev" ]; then
             init_dev "$TARGET_ARG"
         elif [ "$MODE" == "prod" ]; then
+            if [ "$TARGET_ARG" != "all" ]; then
+                echo "Error: 'prod init' does not accept a target argument."
+                echo "Usage: $0 prod init"
+                exit 1
+            fi
             init_prod
         fi
         ;;
