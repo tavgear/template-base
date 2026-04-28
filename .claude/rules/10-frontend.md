@@ -27,6 +27,6 @@ const res = await fetch(`${apiUrl}/api/...`, { next: { revalidate: 60 } });
 ```
 
 ## Что НЕ делать
-- Не использовать `pages/`, `getStaticProps`, `getServerSideProps`.
+- Не использовать `pages/`, `getStaticProps`, `getServerSideProps`. Только App Router.
 - Не хардкодить URL бэкенда на клиенте.
 - Не обращаться к Strapi с клиента — все запросы только server-side (Server Components, Route Handlers, Server Actions).
